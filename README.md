@@ -1,46 +1,93 @@
-# Introduction
+# dep-scan-action
 
-This action wraps [OWASP-dep-scan](https://github.com/OWASP-dep-scan/dep-scan/), 
-a fully open-source security audit tool for project dependencies based on known 
-vulnerabilities and advisories. The output is fully compatible with 
-[grafeas](https://github.com/grafeas/grafeas).
+Fully open-source GitHub Action for performing security audits on project dependencies using dep-scan, based on known
+vulnerabilities and advisories. No server required!
 
-Please consider [making a monetary contribution](https://owasp.org/donate/?reponame=www-project-dep-scan&title=OWASP+depscan) to OWASP-dep-scan. We appreciate 
-your support!
+This project is a fork of [AppThreat/dep-scan-action](https://github.com/AppThreat/dep-scan-action)
 
-## Usage
+## Licenses
 
-### Inputs
+![MIT](https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/MIT_logo.svg/100px-MIT_logo.svg.png)
+![GNU General Public License v3](https://www.gnu.org/graphics/gplv3-127x51.png)
 
-With minimal configuration
+### What does that mean?
 
-```yaml
-- uses: AppThreat/dep-scan-action@master
-  with:
-    # The target directory to be scanned. Optional.
-    src: /github/workspace
-    # Output file for the generated report. Optional.
-    report_file: /github/workspace/reports/depscan.json
-    # Must equal "I have sponsored OWASP-dep-scan" for action to run. Required.
-    profile: generic
-    thank_you: "I have not sponsored OWASP-dep-scan."
-  env:
-    VDB_HOME: ${{ github.workspace }}/db
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
+- Anyone can run the software licensed under GPLv3 for any purpose without restrictions.
+- GPLv3 ensures that users have access to the software's source code, allowing them to study, modify, and improve it.
+- Users can distribute copies of the software, but they must do so under the terms of GPLv3. This ensures that the
+  original freedoms are maintained in new versions.
+- If someone modifies the software and distributes it, they must do so under the same GPLv3 terms and provide the source
+  code for their modifications as well.
+- If you are interested in knowing more details about the license, please visit the following links:
+    - Spanish: https://www.gnu.org/licenses/gpl-3.0.es.html
+    - English: https://www.gnu.org/licenses/gpl-3.0.en.html
 
-Upload reports to build artifacts
+## Inputs:
 
-```yaml
-- uses: AppThreat/dep-scan-action@master
-  with:
-      thank_you: "I have sponsored OWASP-dep-scan."
-  env:
-    VDB_HOME: ${{ github.workspace }}/db
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-- uses: actions/upload-artifact@v4
-  with:
-    name: reports
-    path: reports
-```
+- **src**:
+    - **Description**: The source directory to scan. If not specified, it defaults to the workspace directory (
+      `/github/workspace`).
+    - **Required**: No
+    - **Default**: `/github/workspace`
 
+- **profile**:
+    - **Description**: The name of the profile to use for the scan. Available options include `appsec`, `research`,
+      `operational`, `threat-modeling`, `license-compliance`, and `generic`.
+    - **Required**: No
+    - **Default**: `generic`
+
+- **project_type**:
+    - **Description**: Override the project type if the automatic detection is incorrect. Refer to
+      the [dep-scan documentation](https://github.com/owasp-dep-scan/dep-scan?tab=readme-ov-file#supported-languages-and-package-format)
+      for supported languages and package formats.
+    - **Required**: No
+
+- **thank_you**:
+    - **Description**: A field to indicate whether you have sponsored OWASP dep-scan.
+    - **Required**: No
+    - **Default**: `I have not sponsored OWASP-dep-scan.`
+
+## How to Use:
+
+1. **Add the Action to Your Workflow**:  
+   Include the `dep-scan-action` in your GitHub Actions workflow YAML file. Here’s an example:
+
+    ```yaml
+    jobs:
+      security-audit:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+          - name: Run dep-scan-action
+            uses: cob0/dep-scan-action@master
+            with:
+              src: 'path/to/your/source'
+              profile: 'appsec'
+              project_type: 'nodejs'
+            env:
+              VDB_HOME: ${{ github.workspace }}/db
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          - name: Upload report to build artifacts
+            uses: actions/upload-artifact@v2
+            with:
+              name: dep-scan-report
+              path: path/to/report/directory/*
+    ```
+
+2. **Configure Inputs:**
+
+   Specify the inputs as needed. You can customize the `src`, `profile`, and `project_type` based on your project
+   requirements.
+   If you do not provide a value for an input, the action will use the default value.
+
+3. **Review the Results:**
+
+   After the action runs, review the output logs to see the results of the security audit. The action will provide
+   insights
+   into any vulnerabilities found in your dependencies.
+
+4. **Upload Reports:**
+
+   The last step in the example uploads the generated reports as artifacts. Make sure to replace
+   `path/to/report/directory/*` with the actual path where the reports are generated by the `dep-scan-action`. 
